@@ -73,6 +73,8 @@ class AuthService
      * @throws ConnectionException
      */
     public function register(
+        string $firstName,
+        string $lastName,
         LoginWith $loginWith,
         string $login,
         string $password,
@@ -81,10 +83,13 @@ class AuthService
         int $regionId,
         int $registrationPlatformId,
         int $roleId,
+        string $deviceId,
     ): array
     {
         $response = $this->httpClient()
             ->post($this->url('/register'), [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'login_with' => $loginWith->value,
                 'login_email' => $login,
                 'password' => $password,
@@ -93,6 +98,7 @@ class AuthService
                 'region_id' => $regionId,
                 'registration_platform_id' => $registrationPlatformId,
                 'role_id' => $roleId,
+                'device_id' => $deviceId,
             ]);
 
         if ( ! $response->successful()) {
