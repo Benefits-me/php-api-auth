@@ -83,7 +83,7 @@ class AuthService
         int $regionId,
         int $registrationPlatformId,
         int $roleId,
-        string|null $deviceId,
+        string|null $deviceId = null,
     ): array
     {
         $response = $this->httpClient()
