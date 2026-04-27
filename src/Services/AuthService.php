@@ -118,4 +118,18 @@ class AuthService
 
         return $response->successful();
     }
+
+    /**
+     * @param string $permission The name of the permission.
+     * @param string $token The user's authentication token.
+     * @return bool True if the user has the permission, false otherwise.
+     * @throws ConnectionException
+     */
+    public function hasPermission(string $permission, string $token): bool
+    {
+        $response = $this->httpClient($token)
+            ->get($this->url("/permissions/has/{$permission}"));
+
+        return $response->successful();
+    }
 }
