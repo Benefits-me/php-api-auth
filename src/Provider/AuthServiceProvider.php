@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace BenefitsMe\ApiAuth\Provider;
 
+use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
+use BenefitsMe\ApiAuth\Exceptions\TokenProviderMissingException;
 use BenefitsMe\ApiAuth\Services\AuthService;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,8 +15,20 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->determineConfigFile(), 'api-auth');
 
+        $this->app->bind(TokenProviderInterface::class, function ($app) {
+            $providerClass = config('api-auth.token_provider');
+
+            if ( ! $providerClass) {
+                throw new TokenProviderMissingException();
+            }
+
+            return $app->make($providerClass);
+        });
+
         $this->app->singleton(AuthService::class, function ($app) {
-            return new AuthService();
+            return new AuthService(
+                $app->make(TokenProviderInterface::class)
+            );
         });
     }
 
