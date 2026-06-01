@@ -151,10 +151,16 @@ class AuthService
         $response = $this->httpClient($token)
             ->get($this->url('/me'));
 
-        if ($response->failed()) {
+        if (! $response->successful()) {
             throw new FailedRequestException('Failed to fetch user data');
         }
 
-        return $response->json();
+        $data = $response->json();
+
+        if (empty($data)) {
+            throw new FailedRequestException('Failed to fetch user data: empty or invalid JSON body');
+        }
+
+        return $data;
     }
 }
