@@ -140,7 +140,7 @@ class AuthService
     }
 
     /**
-     * @return array{id: int, model: string}
+     * @return array{id: int}
      * @throws FailedRequestException
      * @throws ConnectionException
      */
