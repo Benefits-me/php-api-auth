@@ -138,4 +138,29 @@ class AuthService
 
         return $response->successful();
     }
+
+    /**
+     * @return array{id: int}
+     * @throws FailedRequestException
+     * @throws ConnectionException
+     */
+    public function me(): array
+    {
+        $token = $this->tokenProvider->getToken();
+
+        $response = $this->httpClient($token)
+            ->get($this->url('/me'));
+
+        if (! $response->successful()) {
+            throw new FailedRequestException('Failed to fetch user data');
+        }
+
+        $data = $response->json();
+
+        if (empty($data)) {
+            throw new FailedRequestException('Failed to fetch user data: empty or invalid JSON body');
+        }
+
+        return $data;
+    }
 }
