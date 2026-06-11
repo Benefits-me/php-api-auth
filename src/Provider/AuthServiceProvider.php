@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BenefitsMe\ApiAuth\Provider;
 
+use BenefitsMe\ApiAuth\Contracts\AuthServiceInterface;
 use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
 use BenefitsMe\ApiAuth\Exceptions\TokenProviderMissingException;
 use BenefitsMe\ApiAuth\Services\AuthService;
@@ -30,6 +31,8 @@ class AuthServiceProvider extends ServiceProvider
                 $app->make(TokenProviderInterface::class)
             );
         });
+
+        $this->app->alias(AuthService::class, AuthServiceInterface::class);
     }
 
     public function boot(): void

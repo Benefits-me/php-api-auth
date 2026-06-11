@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BenefitsMe\ApiAuth\Services;
 
+use BenefitsMe\ApiAuth\Contracts\AuthServiceInterface;
 use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
 use BenefitsMe\ApiAuth\Enums\LoginWith;
 use BenefitsMe\ApiAuth\Exceptions\FailedRequestException;
@@ -11,7 +12,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     protected string $apiBaseUrl;
 
