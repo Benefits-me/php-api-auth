@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
 use BenefitsMe\ApiAuth\Services\AuthService;
+use BenefitsMe\ApiAuth\Exceptions\FailedRequestException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -60,4 +61,15 @@ test('it throws a connection exception on network failure', function () {
 
     expect(fn () => $this->authService->hasPermission('any-permission'))
         ->toThrow(ConnectionException::class);
+});
+
+test('it throws a failed request exception on 500 server error when checking permission', function () {
+    Http::fake([
+        config('api-auth.url') . '/*' => Http::response([], 500),
+    ]);
+
+    $this->tokenProviderMock->shouldReceive('getToken')->once()->andReturn('any-token');
+
+    expect(fn () => $this->authService->hasPermission('view-reports'))
+        ->toThrow(FailedRequestException::class, 'Permission check failed due to a server error.');
 });
