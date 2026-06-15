@@ -73,3 +73,15 @@ test('it throws a failed request exception on 500 server error when checking per
     expect(fn () => $this->authService->hasPermission('view-reports'))
         ->toThrow(FailedRequestException::class, 'Permission check failed due to a server error.');
 });
+
+test('it throws a failed request exception on 500 server error when validating token', function () {
+    Http::fake([
+        config('api-auth.url') . '/*' => Http::response([], 500),
+    ]);
+
+    $this->tokenProviderMock->shouldReceive('getToken')->once()->andReturn('any-token');
+
+    expect(fn () => $this->authService->validateToken())
+        ->toThrow(FailedRequestException::class, 'Token validation failed due to a server error.');
+});
+
