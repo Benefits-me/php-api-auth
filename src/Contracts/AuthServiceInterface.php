@@ -11,12 +11,14 @@ use Illuminate\Http\Client\ConnectionException;
 interface AuthServiceInterface
 {
     /**
+     * @return array{token: string, type: string, name: string, expires_at: array|null}
      * @throws ConnectionException
      * @throws FailedRequestException
      */
     public function login(string $login, string $password): array;
 
     /**
+     * @return array{id: int, login: string}
      * @throws FailedRequestException
      * @throws ConnectionException
      */
@@ -35,6 +37,7 @@ interface AuthServiceInterface
     ): array;
 
     /**
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function validateToken(): bool;
@@ -42,6 +45,7 @@ interface AuthServiceInterface
     /**
      * @param string $permission The name of the permission.
      * @return bool True if the user has the permission, false otherwise.
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function hasPermission(string $permission): bool;

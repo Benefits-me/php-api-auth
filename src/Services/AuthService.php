@@ -113,6 +113,7 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function validateToken(): bool
@@ -122,12 +123,17 @@ class AuthService implements AuthServiceInterface
         $response = $this->httpClient($token)
             ->get($this->url('/validate-token'));
 
+        if ($response->serverError()) {
+            throw new FailedRequestException('Token validation failed due to a server error.');
+        }
+
         return $response->successful();
     }
 
     /**
      * @param string $permission The name of the permission.
      * @return bool True if the user has the permission, false otherwise.
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function hasPermission(string $permission): bool
@@ -136,6 +142,10 @@ class AuthService implements AuthServiceInterface
 
         $response = $this->httpClient($token)
             ->get($this->url("/permissions/has/{$permission}"));
+
+        if ($response->serverError()) {
+            throw new FailedRequestException('Permission check failed due to a server error.');
+        }
 
         return $response->successful();
     }

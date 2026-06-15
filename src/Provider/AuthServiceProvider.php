@@ -32,7 +32,7 @@ class AuthServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->alias(AuthService::class, AuthServiceInterface::class);
+        $this->app->bind(AuthServiceInterface::class, AuthService::class);
     }
 
     public function boot(): void
