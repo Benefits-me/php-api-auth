@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BenefitsMe\ApiAuth\Services;
 
+use BenefitsMe\ApiAuth\Contracts\AuthServiceInterface;
 use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
 use BenefitsMe\ApiAuth\Enums\LoginWith;
 use BenefitsMe\ApiAuth\Exceptions\FailedRequestException;
@@ -11,7 +12,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     protected string $apiBaseUrl;
 
@@ -112,6 +113,7 @@ class AuthService
     }
 
     /**
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function validateToken(): bool
@@ -121,12 +123,17 @@ class AuthService
         $response = $this->httpClient($token)
             ->get($this->url('/validate-token'));
 
+        if ($response->serverError()) {
+            throw new FailedRequestException('Token validation failed due to a server error.');
+        }
+
         return $response->successful();
     }
 
     /**
      * @param string $permission The name of the permission.
      * @return bool True if the user has the permission, false otherwise.
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
     public function hasPermission(string $permission): bool
@@ -135,6 +142,10 @@ class AuthService
 
         $response = $this->httpClient($token)
             ->get($this->url("/permissions/has/{$permission}"));
+
+        if ($response->serverError()) {
+            throw new FailedRequestException('Permission check failed due to a server error.');
+        }
 
         return $response->successful();
     }
