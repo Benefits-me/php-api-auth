@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace BenefitsMe\ApiAuth\Services;
 
+use BenefitsMe\ApiAuth\Contracts\AuthServiceInterface;
+use BenefitsMe\ApiAuth\Contracts\TokenProviderInterface;
 use BenefitsMe\ApiAuth\Enums\LoginWith;
 use BenefitsMe\ApiAuth\Exceptions\FailedRequestException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     protected string $apiBaseUrl;
 
     protected string $apiVersion;
 
-    public function __construct()
+    public function __construct(
+        private readonly TokenProviderInterface $tokenProvider
+    )
     {
         $this->apiBaseUrl = config('api-auth.url');
         $this->apiVersion = config('api-auth.version');
@@ -109,13 +113,65 @@ class AuthService
     }
 
     /**
+     * @throws FailedRequestException
      * @throws ConnectionException
      */
-    public function validateToken(string $token): bool
+    public function validateToken(): bool
     {
+        $token = $this->tokenProvider->getToken();
+
         $response = $this->httpClient($token)
             ->get($this->url('/validate-token'));
 
+        if ($response->serverError()) {
+            throw new FailedRequestException('Token validation failed due to a server error.');
+        }
+
         return $response->successful();
+    }
+
+    /**
+     * @param string $permission The name of the permission.
+     * @return bool True if the user has the permission, false otherwise.
+     * @throws FailedRequestException
+     * @throws ConnectionException
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $token = $this->tokenProvider->getToken();
+
+        $response = $this->httpClient($token)
+            ->get($this->url("/permissions/has/{$permission}"));
+
+        if ($response->serverError()) {
+            throw new FailedRequestException('Permission check failed due to a server error.');
+        }
+
+        return $response->successful();
+    }
+
+    /**
+     * @return array{id: int}
+     * @throws FailedRequestException
+     * @throws ConnectionException
+     */
+    public function me(): array
+    {
+        $token = $this->tokenProvider->getToken();
+
+        $response = $this->httpClient($token)
+            ->get($this->url('/me'));
+
+        if (! $response->successful()) {
+            throw new FailedRequestException('Failed to fetch user data');
+        }
+
+        $data = $response->json();
+
+        if (empty($data)) {
+            throw new FailedRequestException('Failed to fetch user data: empty or invalid JSON body');
+        }
+
+        return $data;
     }
 }
