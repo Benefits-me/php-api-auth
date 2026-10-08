@@ -7,4 +7,6 @@ enum LoginWith: string
     case Email = 'email';
 
     case Private = 'private';
+
+    case Sso = 'sso';
 }
