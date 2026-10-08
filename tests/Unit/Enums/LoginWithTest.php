@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use BenefitsMe\ApiAuth\Enums\LoginWith;
 
 test('login with knows email, private and sso', function () {
